@@ -23,13 +23,13 @@ public struct OpenIdConfiguration: Codable, JSONDecodable {
     public let issuer: URL
     public let jwksUri: URL
     public let registrationEndpoint: URL?
-    public let revocationEndpoint: URL
+    public let revocationEndpoint: URL? /* FIXME */
     public let tokenEndpoint: URL
     public let userinfoEndpoint: URL?
     public let scopesSupported: [String]?
     public let responseTypesSupported: [String]
     public let responseModesSupported: [String]?
-    public let claimsSupported: [Claim]
+    public let claimsSupported: [Claim]? /* FIXME */
     public let grantTypesSupported: [GrantType]?
     public let subjectTypesSupported: [String]
 

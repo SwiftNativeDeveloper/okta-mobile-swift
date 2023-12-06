@@ -69,7 +69,7 @@ extension Token.RevokeRequest: OAuth2APIRequest, APIRequestBody {
     typealias ResponseType = Empty
     
     var httpMethod: APIRequestMethod { .post }
-    var url: URL { openIdConfiguration.revocationEndpoint }
+    var url: URL { openIdConfiguration.revocationEndpoint! /* FIXME */ }
     var contentType: APIContentType? { .formEncoded }
     var acceptsType: APIContentType? { .json }
     var bodyParameters: [String: Any]? {
