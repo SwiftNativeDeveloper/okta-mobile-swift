@@ -12,9 +12,16 @@
 
 import Foundation
 
-extension Array where Element == GrantType {
-    /// The list of all grants that the Direct Authentication SDK supports.
-    public static var directAuth: [GrantType] {
-        [ .password, .oob, .otp, .oobMFA, .otpMFA, .webAuthn, .webAuthnMFA ]
-    }
+public extension TimeInterval {
+    static let standard: Self = 3
+    static let short: Self = 1
+    static let long: Self = 5
+    static let veryLong: Self = 10
+}
+
+public extension DispatchTime {
+    static var standard: Self { .now() + .standard }
+    static var short: Self { .now() + .short }
+    static var long: Self { .now() + .long }
+    static var veryLong: Self { .now() + .veryLong }
 }

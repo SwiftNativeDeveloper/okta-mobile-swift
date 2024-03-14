@@ -12,9 +12,14 @@
 
 import Foundation
 
-extension Array where Element == GrantType {
-    /// The list of all grants that the Direct Authentication SDK supports.
-    public static var directAuth: [GrantType] {
-        [ .password, .oob, .otp, .oobMFA, .otpMFA, .webAuthn, .webAuthnMFA ]
+extension WebAuthn {
+    /**
+     This member contains the type of the public key credential the caller is referring to.
+     
+     - Note: [W3C Reccomendation](https://www.w3.org/TR/webauthn/#dom-publickeycredentialdescriptor-type)
+     */
+    public enum PublicKeyCredentialType: String, Codable {
+        /// Descripes a public key credential type.
+        case publicKey = "public-key"
     }
 }

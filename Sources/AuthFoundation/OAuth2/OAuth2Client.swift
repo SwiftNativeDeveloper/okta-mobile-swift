@@ -117,9 +117,11 @@ public final class OAuth2Client {
     /// If this value has recently been retrieved, the cached result is returned.
     /// - Parameter completion: Completion block invoked with the result.
     public func openIdConfiguration(completion: @escaping (Result<OpenIdConfiguration, OAuth2Error>) -> Void) {
-        configurationQueue.sync {
+        configurationLock.withLock {
             if let openIdConfiguration = openIdConfiguration {
-                completion(.success(openIdConfiguration))
+                configurationQueue.async {
+                    completion(.success(openIdConfiguration))
+                }
             } else {
                 guard openIdConfigurationAction == nil else {
                     openIdConfigurationAction?.add(completion)
@@ -161,14 +163,14 @@ public final class OAuth2Client {
     ///   - token: Token to refresh.
     ///   - completion: Completion bock invoked with the result.
     public func refresh(_ token: Token, completion: @escaping (Result<Token, OAuth2Error>) -> Void) {
-        guard let clientSettings = token.context.clientSettings,
-              token.refreshToken != nil
-        else {
-            completion(.failure(.missingToken(type: .refreshToken)))
-            return
-        }
-        
-        refreshQueue.sync {
+        refreshLock.withLock {
+            guard let clientSettings = token.context.clientSettings,
+                  token.refreshToken != nil
+            else {
+                completion(.failure(.missingToken(type: .refreshToken)))
+                return
+            }
+            
             guard token.refreshAction == nil else {
                 token.refreshAction?.add(completion)
                 return
@@ -180,11 +182,6 @@ public final class OAuth2Client {
         }
     }
     
-    private(set) lazy var refreshQueue: DispatchQueue = {
-        DispatchQueue(label: "com.okta.refreshQueue.\(baseURL.host ?? "unknown")",
-                      qos: .userInitiated,
-                      attributes: .concurrent)
-    }()
     private func performRefresh(token: Token, clientSettings: [String: String]) {
         guard let action = token.refreshAction else { return }
         
@@ -524,6 +521,14 @@ public final class OAuth2Client {
     // MARK: Private properties / methods
     private let delegates = DelegateCollection<OAuth2ClientDelegate>()
 
+    private let refreshLock = UnfairLock()
+    private(set) lazy var refreshQueue: DispatchQueue = {
+        DispatchQueue(label: "com.okta.refreshQueue.\(baseURL.host ?? "unknown")",
+                      qos: .userInitiated,
+                      attributes: .concurrent)
+    }()
+
+    private let configurationLock = UnfairLock()
     private lazy var configurationQueue: DispatchQueue = {
         DispatchQueue(label: "com.okta.configurationQueue.\(baseURL.host ?? "unknown")",
                       qos: .userInitiated,
